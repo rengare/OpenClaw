@@ -50,8 +50,6 @@ struct GameOptions
         userDirectory = "";
 
         startupCommandsFile = "startup_commands.txt";
-
-        joystickVibration = true;
     }
 
     GameOptions()
@@ -100,9 +98,6 @@ struct GameOptions
 
     // File with prewritten commands which are executed upon startup of the game
     std::string startupCommandsFile;
-
-    // Joystick/Controller
-    bool joystickVibration;
 };
 
 // Cheats and stuff
@@ -189,6 +184,15 @@ struct ControlOptions
         float distanceThreshold;
         unsigned int timeThreshold;
     } touchScreen;
+};
+
+struct ControllerOptions
+{
+    ControllerOptions() {
+        vibration = true;
+    }
+
+    bool vibration;
 };
 
 struct DebugOptions
@@ -302,6 +306,7 @@ public:
     GameOptions* GetGameConfig() { return &m_GameOptions; }
     const GlobalOptions* GetGlobalOptions() const { return &m_GlobalOptions; }
     const ControlOptions* GetControlOptions() const { return &m_ControlOptions; }
+    const ControllerOptions* GetControllerOptions() const { return &m_ControllerOptions; }
     const DebugOptions* GetDebugOptions() const { return &m_DebugOptions; }
 
     TiXmlElement* GetActorPrototypeElem(ActorPrototype proto);
@@ -309,8 +314,11 @@ public:
     const shared_ptr<LevelMetadata> GetLevelMetadata(int levelNumber) const;
 
     void RegisterTouchRecognizers(ITouchHandler &touchHandler);
-    void HandleJoystickDeviceEvent(Uint32 type, Sint32 which);
-    void JoystickRumblePlay(float strength, Uint32 length);
+
+    void ControllerDeviceHandleEvent(Uint32 type, Sint32 which);
+    void ControllerRumblePlay(float strength, Uint32 length);
+    bool ControllerDeviceAttach(Uint32 deviceIndex);
+    void ControllerDeviceDeAttach();
 
 protected:
     virtual void VRegisterGameEvents() { }
@@ -328,9 +336,9 @@ protected:
 
     GameOptions m_GameOptions;
 
-    SDL_Joystick* m_Joystick;
-    SDL_Haptic* m_JoystickHaptic;
-    Sint32 m_JoystickDeviceIndex;
+    SDL_Joystick* m_Controller;
+    SDL_Haptic* m_ControllerHaptic;
+    Sint32 m_ControllerDeviceIndex;
 
 private:
     bool InitializeDisplay(GameOptions& gameOptions);
@@ -368,6 +376,7 @@ private:
     GameCheats m_GameCheats;
     GlobalOptions m_GlobalOptions;
     ControlOptions m_ControlOptions;
+    ControllerOptions m_ControllerOptions;
     DebugOptions m_DebugOptions;
 
     ActorXmlPrototypeMap m_ActorXmlPrototypeMap;
